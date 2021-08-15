@@ -7,12 +7,14 @@ In the Project Workspace, you'll find a data set containing real messages that w
 
 My project includes a web app where an emergency worker can input a new message and get classification results in several categories:
 
-![result](/relative/path/to/img.jpg?raw=true "Classification result")
+![result](/Classification_Results.PNG?raw=true "Classification result")
 
 The web app also displays two visualizations of the data:
 
-![visualizations](/relative/path/to/img.jpg?raw=true "Visualizations of data")
+![visualizations](/Data_Visualizations.PNG?raw=true "Visualizations of data")
 
+The structure of the project:
+![structure](/files.png?raw=true "Visualizations of data")
 
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
