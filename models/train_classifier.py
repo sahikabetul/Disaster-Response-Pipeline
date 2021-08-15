@@ -91,7 +91,7 @@ def build_model():
     # define parameters for grid search
     parameters = {
         'tfidf__use_idf': (True, False),
-        'clf__estimator__n_estimators': [50, 40, 30]
+        'clf__estimator__n_estimators': [50, 100, 150]
     }
     
     # choose a method to build model

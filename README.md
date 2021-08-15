@@ -28,3 +28,8 @@ The structure of the project:
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+### Dependencies:
+numpy, pandas, matplotlib, json, plotly, nltk, flask, sklearn, sqlalchemy, sys, re, pickle
+
+This project also requires Python 3.x along with the above libraries installed as a pre-requisite
