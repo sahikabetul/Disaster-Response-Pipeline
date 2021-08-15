@@ -5,10 +5,13 @@ In this project, I applied data engineering skills to analyze disaster data from
 
 In the Project Workspace, you'll find a data set containing real messages that were sent during disaster events. I created a machine learning pipeline to categorize these events so that we can send the messages to an appropriate disaster relief agency.
 
-My project includes a web app where an emergency worker can input a new message and get classification results in several categories. The web app also displays two visualizations of the data.
+My project includes a web app where an emergency worker can input a new message and get classification results in several categories:
 
+![result](/relative/path/to/img.jpg?raw=true "Classification result")
 
+The web app also displays two visualizations of the data:
 
+![visualizations](/relative/path/to/img.jpg?raw=true "Visualizations of data")
 
 
 ### Instructions:

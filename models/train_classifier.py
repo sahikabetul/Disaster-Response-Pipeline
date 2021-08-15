@@ -15,9 +15,9 @@ from nltk.stem import WordNetLemmatizer
 
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn. ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.ensemble import AdaBoostClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import f1_score, recall_score, precision_score, classification_report, accuracy_score
 
@@ -26,54 +26,46 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 def load_data(database_filepath):
-    """Load the specific database
+    """
+    Load the data from the specific file
     
-    Load the data from the specific file.
+    Args:
+    database_filepath: str. File path of the specific database
     
-    Parameters:
-    -----------
-    database_filepath: string
-        File path of the specific database
-    
-    Results:
-    ----------
-    X: ndarray
-        Ndarray values store the message information
-    Y: ndarray
-        Ndarray values store the the multi class information
-    category_names: list
-        List contains the multi class string
+    Returns:
+    X: ndarray. Ndarray values store the message information
+    Y: ndarray. Ndarray values store the the multi class information
+    category_names: list. List contains the multi class string
     """
     # loading data from .db file
-    engine = create_engine(f'sqlite:///{database_filepath}')
-    df = pd.read_sql_table(database_filepath, engine)
+    engine = create_engine('sqlite:///{}'.format(database_filepath))
+    df = pd.read_sql_table("MessagesCategories", engine)
     
-    # creating input and label lists
-    X = df.id.values
-    Y = df.iloc[:, 4:].values
-    category_names = df.iloc[:, 4:].columns.tolist()
+    # creating message and category lists
+    X = df['message']
+    Y = df.iloc[:, 4:]
+    category_names = df.columns[4:]
     
     return X, Y, category_names
 
 
 def tokenize(text):
-    #cleaning url's from text
+    """Load, clean and tokenize a text"""
+    #clean url's from text
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
-        text = text.replace(url, "urlplaceholder")
+        text = text.replace(url, " ")
         
-    #normalizing text
+    #normalize text
     text = re.sub(r"[^a-zA-Z0-9]", " ", text) #[^a-zA-Z0-9]
     text = text.lower()    
 
-    #tokenizing text
+    #tokenize text
     tokens = word_tokenize(text)
     
-    #lemmatizing and removing stop words
+    # list tokens without stop-words
     lemmatizer = WordNetLemmatizer()
-    
-    # listing tokens without stop-words
     stop_words = stopwords.words("english")
     clean_tokens = []
     for token in tokens:
@@ -84,28 +76,25 @@ def tokenize(text):
 
 
 def build_model():
-    #creating model
-    forest = RandomForestClassifier(random_state=42, n_jobs=4)
+    """
+    Create model to be trained on. The model include pipeline and cross validation parameters for grid search.
+    Grid search is optional.
+    """
 
     #creating pipeline for preprocesses and training
     pipeline = Pipeline([
-        ("text_pipeline", Pipeline([
-            ("vect", CountVectorizer(tokenizer=tokenize)),
-            ("tfidf", TfidfTransformer())
-        ])),
-        ("clf", MultiOutputClassifier(forest, n_jobs=2))
+        ("vect", CountVectorizer(tokenizer=tokenize)),
+        ("tfidf", TfidfTransformer()),
+        ('clf', MultiOutputClassifier(AdaBoostClassifier()))
     ])
     
     # define parameters for grid search
     parameters = {
-    'text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
-    'text_pipeline__vect__max_df': (0.75, 1.0),
-    'text_pipeline__vect__max_features': (5000, 10000),
-    'clf__estimator__n_estimators': [10, 20],
-    'clf__estimator__max_depth': [4, 6],
+        'tfidf__use_idf': (True, False),
+        'clf__estimator__n_estimators': [50, 40, 30]
     }
     
-        # choose a method to build model
+    # choose a method to build model
     print("Hint: GridSearchCV will takes more time!\n")
     chose_option = input("Do you want to GridSearchCV(Yes or No): ").lower()
     while True:
@@ -122,17 +111,17 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """Evaluate model"""
     # predicting labels
     Y_pred = model.predict(X_test.astype(str))
     
     #comparing predicted labels with ground-truth
-    for index, column in enumerate(category_names):
-        report = classification_report(Y_test[:, index], Y_pred[:, index], labels=np.arange(1), target_names=[column],  digits=3)
-    
-    return report
+    print(classification_report(Y_pred, Y_test.values, target_names=category_names))
+    print('Accuracy Score: {}'.format(np.mean(Y_test.values == Y_pred)))
 
 
 def save_model(model, model_filepath):
+    """Save model"""
     with open(model_filepath, "wb") as file:
         pickle.dump(model, file)
 
